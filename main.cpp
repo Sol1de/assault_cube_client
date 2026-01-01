@@ -1,6 +1,7 @@
 #include <iostream>
 #include "process_finder/ProcessFinder.h"
 #include "memory_handler/MemoryHandler.h"
+#include "Offsets.h"
 
 int main() {
     // Processus cible
@@ -8,7 +9,7 @@ int main() {
 
     std::cout << "[*] Recherche de " << targetProcess << "..." <<std::endl;
 
-    // On stock l'id du processus cible
+    // Récupère le PID (identifiant unique du processus)
     const DWORD processId = GetProcessId(targetProcess);
 
     if (processId == 0) {
@@ -27,16 +28,29 @@ int main() {
 
     std::cout << "[*] Handle obtenu avec succes!" << std::endl;
 
-    const uintptr_t healthAddress = 0x009F2B8C;
-    int health = ReadMemory<int>(processHandle, healthAddress);
+    // Récupère l'adresse de base du module (où le jeu est chargé en mémoire)
+    uint32_t moduleBase = GetModuleBaseAddress(processId, targetProcess);
 
-    std::cout << "[*] Health: " << health << std::endl;
+    if (moduleBase == 0) {
+        std::cout << "[!] Module non trouve\n";
+        return 1;
+    }
+    std::cout << "[+] Module base: 0x" << std::hex << moduleBase << std::dec << "\n";
 
-    if (WriteMemory(processHandle, healthAddress, 999999)) {
-        std::cout << "[+] Ecriture reussie!" << std::endl;
-    } else {
-        std::cout << "[!] Ecriture echouee" << std::endl;
+    // Lit le pointeur vers localPlayer (le jeu stocke l'adresse du joueur ici)
+    auto localPlayer = ReadMemory<uint32_t>(processHandle, moduleBase + Offsets::localPlayer);
+
+    if (localPlayer == 0) {
+        std::cout << "[!] localPlayer est NULL - es-tu en jeu ?" << std::endl;
+        return 1;
     }
 
+    // Lit la vie à partir de l'adresse du joueur + offset health
+    auto localPlayerHealth = ReadMemory<int>(processHandle, localPlayer + Offsets::health);
+
+    std::cout << "[*] Local player health: " << localPlayerHealth << std::endl;
+
+    // Libère le handle (évite les fuites de ressources)
+    CloseHandle(processHandle);
     return 0;
 }
