@@ -1,5 +1,6 @@
 #include <iostream>
 #include "process_finder/ProcessFinder.h"
+#include "memory_reader/MemoryReader.h"
 
 int main() {
     // Processus cible
@@ -13,19 +14,23 @@ int main() {
     if (processId == 0) {
         std::cout << "[!] Processus non trouve" << std::endl;
         return 1;
-    } else {
-        std::cout << "[*] Processus trouve: " << processId << std::endl;
     }
+    std::cout << "[*] Processus trouve: " << processId << std::endl;
 
     // On ouvre un accès total (handle) au processus cible pour lire/écrire dans sa mémoire
     HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
-    if (processHandle != NULL) {
-        std::cout << "[*] Handle obtenu avec succes!" << std::endl;
-    } else {
+    if (processHandle == NULL) {
         std::cout << "[!] Impossible d'obtenir le handle" << std::endl;
         return 1;
     }
+
+    std::cout << "[*] Handle obtenu avec succes!" << std::endl;
+
+    const uintptr_t healthAddress = 0x009F2B8C;
+    int health = ReadMemory<int>(processHandle, healthAddress);
+
+    std::cout << "[*] Health: " << health << std::endl;
 
     return 0;
 }
