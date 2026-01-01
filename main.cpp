@@ -2,10 +2,12 @@
 #include "process_finder/ProcessFinder.h"
 
 int main() {
+    // Processus cible
     const char* targetProcess = "ac_client.exe";
 
     std::cout << "[*] Recherche de " << targetProcess << "..." <<std::endl;
 
+    // On stock l'id du processus cible
     const DWORD processId = GetProcessId(targetProcess);
 
     if (processId == 0) {
@@ -15,6 +17,7 @@ int main() {
         std::cout << "[*] Processus trouve: " << processId << std::endl;
     }
 
+    // On ouvre un accès total (handle) au processus cible pour lire/écrire dans sa mémoire
     HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
     if (processHandle != NULL) {
