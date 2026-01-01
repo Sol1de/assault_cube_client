@@ -6,5 +6,5 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(ac_mod main.cpp
         process_finder/ProcessFinder.cpp
         process_finder/ProcessFinder.h
-        memory_reader/MemoryReader.cpp
-        memory_reader/MemoryReader.h)
+        memory_handler/MemoryHandler.cpp
+        memory_handler/MemoryHandler.h)

@@ -1,6 +1,6 @@
 #include <iostream>
 #include "process_finder/ProcessFinder.h"
-#include "memory_reader/MemoryReader.h"
+#include "memory_handler/MemoryHandler.h"
 
 int main() {
     // Processus cible
@@ -31,6 +31,12 @@ int main() {
     int health = ReadMemory<int>(processHandle, healthAddress);
 
     std::cout << "[*] Health: " << health << std::endl;
+
+    if (WriteMemory(processHandle, healthAddress, 999999)) {
+        std::cout << "[+] Ecriture reussie!" << std::endl;
+    } else {
+        std::cout << "[!] Ecriture echouee" << std::endl;
+    }
 
     return 0;
 }
